@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import Swal from 'sweetalert2'
 import api, { getApiErrorMessage } from '../services/api.js'
 import { getStoredUser } from '../services/auth.js'
 
 function BookTable() {
 	const user = getStoredUser()
+	const navigate = useNavigate()
 	const [tables, setTables] = useState([])
 	const [loadingTables, setLoadingTables] = useState(true)
 	const [submitting, setSubmitting] = useState(false)
 	const [tableError, setTableError] = useState('')
-	const [submitError, setSubmitError] = useState('')
-	const [confirmation, setConfirmation] = useState(null)
 	const [wasValidated, setWasValidated] = useState(false)
 	const [reloadKey, setReloadKey] = useState(0)
+	const validationToastShown = useRef(false)
 
 	useEffect(() => {
 		let isCurrent = true
@@ -38,8 +40,6 @@ function BookTable() {
 		event.preventDefault()
 		if (submitting) return
 		setSubmitting(true)
-		setSubmitError('')
-		setConfirmation(null)
 
 		const form = event.currentTarget
 		const formData = new FormData(form)
@@ -54,14 +54,36 @@ function BookTable() {
 		}
 
 		try {
-			const response = await api.post('/bookings', bookingRequest)
-			setConfirmation(response.data)
-			form.reset()
-			setWasValidated(false)
+			await api.post('/bookings', bookingRequest)
+			await Swal.fire({
+				icon: 'success',
+				title: 'Booking Successful!',
+				text: 'Your table has been booked successfully.',
+				confirmButtonText: 'OK',
+			})
+			navigate('/my-bookings')
 		} catch (requestError) {
-			setSubmitError(getApiErrorMessage(requestError, 'Unable to complete booking. Please try again.'))
+			const status = requestError?.response?.status
+			const fallbackMessage = status === 400
+				? 'Please fill all required fields.'
+				: status === 404
+					? 'The selected table or booking could not be found.'
+					: status === 409
+						? 'This table is already booked for the selected date and time.'
+						: 'Failed to book table. Please try again.'
+			const message = getApiErrorMessage(requestError, fallbackMessage)
+			if (status === 400) toast.warning(message)
+			else toast.error(message)
 		} finally {
 			setSubmitting(false)
+		}
+	}
+
+	function handleInvalid() {
+		setWasValidated(true)
+		if (!validationToastShown.current) {
+			toast.warning('Please fill all required fields.')
+			validationToastShown.current = true
 		}
 	}
 
@@ -86,34 +108,16 @@ function BookTable() {
 									<span>Loading available tables...</span>
 								</div>
 							)}
-							{confirmation && (
-								<div className="card booking-confirmation mb-4" role="status">
-									<div className="card-body">
-										<p className="eyebrow mb-2">Table booked successfully.</p>
-										<h2 className="h5 mb-3">Booking #{confirmation.id}</h2>
-										<dl className="row mb-3">
-											<dt className="col-5">Customer</dt><dd className="col-7">{confirmation.customerName}</dd>
-											<dt className="col-5">Table</dt><dd className="col-7">Table {confirmation.tableNumber}</dd>
-											<dt className="col-5">Date</dt><dd className="col-7">{confirmation.bookingDate}</dd>
-											<dt className="col-5">Time</dt><dd className="col-7">{String(confirmation.bookingTime).slice(0, 5)}</dd>
-											<dt className="col-5">People</dt><dd className="col-7">{confirmation.numberOfPeople}</dd>
-											<dt className="col-5">Status</dt><dd className="col-7 mb-0">{confirmation.status}</dd>
-										</dl>
-										<Link className="btn btn-brand" to="/my-bookings">Go to My Bookings</Link>
-									</div>
-								</div>
-							)}
 							{tableError && (
 								<div className="alert alert-danger d-flex align-items-center justify-content-between gap-3" role="alert">
 									<span>{tableError}</span>
 									<button className="btn btn-sm btn-outline-danger flex-shrink-0" type="button" onClick={() => setReloadKey((key) => key + 1)}>Try again</button>
 								</div>
 							)}
-							{submitError && <div className="alert alert-danger" role="alert">{submitError}</div>}
 							{!loadingTables && !tableError && tables.length === 0 && (
 								<div className="alert alert-warning" role="status">There are no available tables right now.</div>
 							)}
-							<form className={wasValidated ? 'was-validated' : ''} onSubmit={handleSubmit} onInvalid={() => setWasValidated(true)} onChange={() => { setSubmitError(''); setConfirmation(null) }}>
+							<form className={wasValidated ? 'was-validated' : ''} onSubmit={handleSubmit} onInvalid={handleInvalid} onChange={() => { validationToastShown.current = false }}>
 								<div className="row g-3">
 									<div className="col-md-6">
 										<label className="form-label" htmlFor="customer-name">Customer name</label>

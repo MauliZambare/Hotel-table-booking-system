@@ -10,6 +10,10 @@ function ProtectedRoute({ children, requireAdmin = false }) {
       return <Navigate to="/admin/login" replace state={{ from: location }} />
     }
 
+    if (location.pathname === '/book-table') {
+      return <Navigate to="/login" replace state={{ from: location, bookingLoginRequired: true }} />
+    }
+
     return (
       <Navigate
         to="/login"

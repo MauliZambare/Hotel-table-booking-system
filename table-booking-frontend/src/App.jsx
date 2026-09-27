@@ -1,4 +1,6 @@
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import './App.css'
 import AdminDashboard from './admin/AdminDashboard.jsx'
 import AdminLayout from './admin/AdminLayout.jsx'
@@ -32,11 +34,12 @@ function CustomerLayout() {
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer />
       <Routes>
         <Route element={<CustomerLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/tables" element={<Tables />} />
-            <Route path="/book-table" element={<BookTable />} />
+            <Route path="/book-table" element={<ProtectedRoute><BookTable /></ProtectedRoute>} />
             <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin/login" element={<AdminLogin />} />

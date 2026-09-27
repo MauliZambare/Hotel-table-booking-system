@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import api, { getApiErrorMessage } from '../services/api.js'
 import { storeUser } from '../services/auth.js'
 
@@ -10,6 +11,19 @@ function Login() {
 	const [wasValidated, setWasValidated] = useState(false)
 	const location = useLocation()
 	const navigate = useNavigate()
+	const bookingWarningShown = useRef(false)
+
+	useEffect(() => {
+		if (!location.state?.bookingLoginRequired) {
+			bookingWarningShown.current = false
+			return
+		}
+
+		if (!bookingWarningShown.current) {
+			bookingWarningShown.current = true
+			toast.warning('Please login first to book a table.')
+		}
+	}, [location.state?.bookingLoginRequired])
 
 	async function handleSubmit(event) {
 		event.preventDefault()
@@ -30,7 +44,7 @@ function Login() {
 				role: response.data.role,
 			}
 			storeUser(user)
-				navigate(user.role === 'ADMIN' ? '/admin' : '/', {
+				navigate(user.role === 'ADMIN' ? '/admin' : location.state?.from?.pathname ?? '/', {
 					replace: true,
 					state: { message: 'Login successful.', messageType: 'success' },
 				})
@@ -48,7 +62,7 @@ function Login() {
 					<p className="eyebrow">Welcome back</p>
 					<h1>Sign in.</h1>
 					<p className="text-muted mb-4">Sign in to keep your dining plans in one place.</p>
-					{location.state?.message && <div className="alert alert-success" role="status">{location.state.message}</div>}
+					{location.state?.message && !location.state?.bookingLoginRequired && <div className="alert alert-success" role="status">{location.state.message}</div>}
 					{error && <div className="alert alert-danger" role="alert">{error}</div>}
 					<form className={wasValidated ? 'was-validated' : ''} onSubmit={handleSubmit} onInvalid={() => setWasValidated(true)} onChange={() => setError('')}>
 						<div className="mb-3">
