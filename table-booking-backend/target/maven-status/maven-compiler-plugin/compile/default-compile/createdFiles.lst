@@ -1,8 +1,10 @@
 com\tablebooking\repository\RestaurantTableRepository.class
+com\tablebooking\service\BookingService$1.class
 com\tablebooking\entity\TableStatus.class
 com\tablebooking\config\TableDataInitializer.class
 com\tablebooking\controller\UserController.class
 com\tablebooking\exception\ConflictException.class
+com\tablebooking\service\EmailService.class
 com\tablebooking\exception\UnauthorizedException.class
 com\tablebooking\service\BookingService.class
 com\tablebooking\TableBookingApplication.class

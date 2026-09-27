@@ -26,6 +26,7 @@ E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\t
 E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\tablebooking\repository\RestaurantTableRepository.java
 E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\tablebooking\repository\UserRepository.java
 E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\tablebooking\service\BookingService.java
+E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\tablebooking\service\EmailService.java
 E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\tablebooking\service\TableService.java
 E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\tablebooking\service\UserService.java
 E:\Projects\Hotel Table Booking System\table-booking-backend\src\main\java\com\tablebooking\TableBookingApplication.java
